@@ -36,4 +36,8 @@ from scripts.ablations import main as ablations
 
 ablations()
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.model_spike"], cwd=ROOT, check=True)
+demo = read_json(ROOT / "cases" / "demo" / "video" / "video.json")
+subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.run_video",
+                demo["path"], "--case-id", "demo", "--question", "Is there footage showing a person?"],
+               cwd=ROOT, check=True)
 print(json.dumps({"status": "complete", "clips": len(complete)}), flush=True)

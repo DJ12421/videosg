@@ -19,6 +19,8 @@ The approved local Neo4j 5.26.30 instance is in ignored `neo4j-local/`. Start `n
 
 Use a fresh `case_id` for each video. Original files stay in place and are never edited. `analyze` combines segmentation/tracking, geometric rules, interval aggregation, and graph export; each output stage is retained in the per-case folder.
 
+For a single command, run `python -m scripts.run_video <video.mp4> --question "When is a person near another person?"`. It ingests, analyzes, loads, queries and audits the result. Omit `--question` to return one representative class-presence snippet when the model detects anything. The JSON result reports `MATCH`, `NO_MATCH`, or `CANNOT_ANSWER`.
+
 For several videos in one logical case, give each a distinct storage ID with `ingest camera_a file_a.mp4 --group-case incident_1` and `ingest camera_b file_b.mp4 --group-case incident_1`. Analyze and load each storage ID, then use `ask-case incident_1` with the same `--template` or `--nl` options. Videos remain independent; no cross-camera identity matching is claimed.
 
 ```powershell
