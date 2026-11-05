@@ -24,6 +24,31 @@ def temporal_iou(a, b):
     return overlap / union if union else 0.0
 
 
+def mock_graph_quality(graph, events, track_map):
+    """Identity-aware temporal R@K; volume IoU needs annotated masks."""
+    ranked = sorted(graph["relations"], key=lambda row: (-len(row["support_frames"]), row["start_s"]))
+    result = {}
+    for threshold in (0.1, 0.5):
+        for k in (20, 50, 100):
+            hits = []
+            by_predicate = {}
+            for truth in events:
+                hit = any(track_map.get(row["subject"]) == truth["subject"]
+                          and track_map.get(row["object"]) == truth["object"]
+                          and row["predicate"] == truth["predicate"]
+                          and temporal_iou([row["start_s"], row["end_s"]],
+                                           [truth["start_s"], truth["end_s"]]) >= threshold
+                          for row in ranked[:k])
+                hits.append(float(hit))
+                by_predicate.setdefault(truth["predicate"], []).append(float(hit))
+            result[f"R@{k}_tIoU_{threshold}"] = statistics.mean(hits) if hits else None
+            result[f"mR@{k}_tIoU_{threshold}"] = statistics.mean(
+                statistics.mean(values) for values in by_predicate.values()) if by_predicate else None
+    result["volume_IoU"] = None
+    result["ranking"] = "support samples descending; source time tie break"
+    return result
+
+
 def image_mask_iou(pred_path, truth_path, pred_id=1, truth_id=1):
     predicted = cv2.imread(str(pred_path), cv2.IMREAD_UNCHANGED)
     truth = cv2.imread(str(truth_path), cv2.IMREAD_UNCHANGED)

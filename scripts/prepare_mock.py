@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from videosg.evaluation import mock_graph_quality
 from videosg.pipeline import ROOT, case_dir, read_json, save_json
 
 
@@ -28,6 +29,12 @@ def prepare(scene_path, consensus_path):
                           "object": f"oracle:{event['object']}", "predicate": event["predicate"],
                           "start_s": event["start_s"], "end_s": event["end_s"], "score": 1.0})
     destination = ROOT / "data" / "mock" / case_id
+    if scene.get("track_map"):
+        known = {row["track_uid"] for row in graph["tracks"]}
+        if set(scene["track_map"]) - known or set(scene["track_map"].values()) - set(objects):
+            raise ValueError("Mock track_map refers to an unknown predicted track or scene object")
+        save_json(destination / "scene_graph_quality.json",
+                  mock_graph_quality(graph, consensus["events"], scene["track_map"]))
     oracle = destination / "oracle_graph.json"
     save_json(oracle, {"video": video, "tracks": tracks, "relations": relations})
     groups = {}

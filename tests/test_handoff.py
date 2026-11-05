@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 
 from videosg.artifacts import rle
-from videosg.evaluation import bootstrap_by_video, graph_predictions, score_query, temporal_iou
+from videosg.evaluation import bootstrap_by_video, graph_predictions, mock_graph_quality, score_query, temporal_iou
 from videosg.queries import TEMPLATES, TEMPLATE_HELP, prepare
 from videosg.rules import region_events
 from scripts.meva import activities
@@ -81,6 +81,13 @@ class HandoffChecks(unittest.TestCase):
             "relations": [{"subject": "a", "object": "b", "predicate": "holding", "start_s": 2, "end_s": 4}]}
         self.assertEqual(graph_predictions(graph, {"subject_class": "person", "object_class": "backpack",
                                                    "predicate": "holding"}), [[2, 4]])
+
+    def test_mock_graph_quality_requires_identity_and_time(self):
+        graph = {"relations": [{"subject": "track_1", "object": "track_2", "predicate": "near",
+                                "start_s": 2, "end_s": 4, "support_frames": [20, 30]}]}
+        truth = [{"subject": "actor_a", "object": "bag", "predicate": "near", "start_s": 2, "end_s": 4}]
+        self.assertEqual(mock_graph_quality(graph, truth, {"track_1": "actor_a", "track_2": "bag"})["R@20_tIoU_0.5"], 1)
+        self.assertEqual(mock_graph_quality(graph, truth, {"track_1": "actor_b", "track_2": "bag"})["R@20_tIoU_0.5"], 0)
 
 
 if __name__ == "__main__":
