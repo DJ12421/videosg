@@ -1,0 +1,6 @@
+activity,predicate,subject_class,object_class,typical_duration_s,interpretation
+hand_interacts_with_person,touching,person,person,4,Mask-contact proxy does not prove hand interaction
+person_picks_up_object,holding,person,,4,Co-motion proxy may begin after pickup and does not detect pickup onset
+person_carries_heavy_object,holding,person,,6,Co-motion proxy cannot determine object weight
+person_transfers_object,holding,person,,4,Holding proxy does not prove transfer between people
+person_talks_to_person,near,person,person,6,Proximity proxy cannot detect speech
