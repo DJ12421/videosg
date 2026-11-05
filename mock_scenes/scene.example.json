@@ -1,0 +1,9 @@
+{
+  "case_id": "mock_01",
+  "clearance_confirmed": false,
+  "consent_forms_outside_repo": false,
+  "actors": ["actor_a", "actor_b"],
+  "props": ["backpack"],
+  "intended_observable_events": ["approaching", "near", "holding"],
+  "capture_notes": "Tripod, fixed frame rate, clap at start, non-graphic staged action"
+}

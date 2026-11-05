@@ -1,0 +1,7 @@
+{
+  "video_sha256": "replace-with-ingest-hash",
+  "annotator_id": "independent_a",
+  "events": [
+    {"predicate": "near", "subject": "actor_a", "object": "backpack", "start_s": 2.0, "end_s": 4.0}
+  ]
+}

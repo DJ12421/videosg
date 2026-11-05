@@ -1,0 +1,20 @@
+{
+  "person": "person", "bicycle": "bicycle", "car": "vehicle", "motorcycle": "motorcycle",
+  "bus": "vehicle", "truck": "vehicle", "train": "train", "boat": "boat",
+  "traffic light": "traffic_light", "stop sign": "sign", "bench": "bench",
+  "cat": "animal", "dog": "animal", "horse": "animal", "bird": "animal",
+  "backpack": "bag", "handbag": "bag", "suitcase": "bag", "umbrella": "umbrella",
+  "bottle": "bottle", "cup": "cup", "wine glass": "glass", "knife": "knife_like_object",
+  "fork": "utensil", "spoon": "utensil", "bowl": "bowl",
+  "chair": "chair", "couch": "couch", "bed": "bed", "dining table": "table",
+  "table-merged": "table", "cabinet-merged": "cabinet", "counter": "counter",
+  "laptop": "laptop", "cell phone": "phone", "tv": "screen", "book": "book",
+  "clock": "clock", "scissors": "scissors", "skateboard": "skateboard",
+  "door-stuff": "door", "window-other": "window", "window-blind": "window",
+  "floor-wood": "floor", "floor-other-merged": "floor", "pavement-merged": "ground",
+  "road": "road", "gravel": "ground", "grass-merged": "ground",
+  "wall-brick": "wall", "wall-stone": "wall", "wall-tile": "wall", "wall-wood": "wall",
+  "wall-other-merged": "wall", "ceiling-merged": "ceiling", "stairs": "stairs",
+  "fence-merged": "fence", "tree-merged": "tree", "building-other-merged": "building",
+  "sky-other-merged": "sky", "river": "water", "sea": "water"
+}

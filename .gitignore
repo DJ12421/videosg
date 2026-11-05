@@ -1,0 +1,9 @@
+cases/
+data/
+models/
+neo4j-local/
+.env
+.venv/
+__pycache__/
+*.pyc
+eval/
