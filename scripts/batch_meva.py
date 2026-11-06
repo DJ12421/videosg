@@ -1,6 +1,7 @@
 """Run one GPU analysis at a time over the fixed, downloaded MEVA subset."""
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import traceback
@@ -10,6 +11,7 @@ for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUME
     os.environ.setdefault(name, "4")
 
 from videosg.pipeline import ROOT, analyze, case_dir, digest, load_graph, pipeline_digest, read_json, save_json
+from neo4j.exceptions import ServiceUnavailable
 
 
 selection = read_json(ROOT / "data" / "meva" / "selection.json")
@@ -24,6 +26,9 @@ progress_file = ROOT / "data" / "meva" / "batch_progress.json"
 with os.fdopen(os.open(pid_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY), "w", encoding="ascii") as file:
     file.write(str(os.getpid()))
 progress = read_json(progress_file) if progress_file.exists() else {}
+selected_ids = {"meva_" + hashlib.sha256(row["stem"].encode()).hexdigest()[:12] for row in selection}
+progress = {key: value for key, value in progress.items() if key in selected_ids}
+save_json(progress_file, progress)
 try:
     for index in range(len(selection)):
         row = selection[index]
@@ -35,7 +40,8 @@ try:
             row = read_json(ROOT / "data" / "meva" / "selection.json")[index]
         case_id = row.get("case_id")
         if not case_id:
-            progress[row["stem"]] = {"status": "failed", "error": "download unavailable after 30 minutes"}
+            progress["meva_" + hashlib.sha256(row["stem"].encode()).hexdigest()[:12]] = {
+                "status": "failed", "error": "download unavailable after 30 minutes"}
             save_json(progress_file, progress)
             continue
         try:
@@ -44,8 +50,14 @@ try:
             if not current or current["run"]["config_sha256"] != digest(ROOT / "config.json") or current["run"]["pipeline_sha256"] != pipeline_digest():
                 print(f"[{index + 1}/{len(selection)}] analyzing {case_id}", flush=True)
                 analyze(case_id)
-            load_graph(case_id, uri, user, password)
-            progress[case_id] = {"status": "complete", "run_id": read_json(path)["run"]["run_id"]}
+            run_id = read_json(path)["run"]["run_id"]
+            try:
+                load_graph(case_id, uri, user, password)
+            except ServiceUnavailable:
+                print(f"[{index + 1}/{len(selection)}] Neo4j offline; retained analyzed graph for {case_id}", flush=True)
+                progress[case_id] = {"status": "analyzed", "run_id": run_id}
+            else:
+                progress[case_id] = {"status": "complete", "run_id": run_id}
         except Exception as exc:
             progress[case_id] = {"status": "failed", "error": str(exc)}
             traceback.print_exc()

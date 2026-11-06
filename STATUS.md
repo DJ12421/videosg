@@ -1,4 +1,10 @@
-# Status — 2026-11-05
+# Status — 2026-11-06
+
+## Nov 6 recovery
+
+- The overnight job reached 14 analyzed clips. Ten loaded to Neo4j; four later loads failed because the locally launched Neo4j server stopped. Nine subsequent clip waits failed after the old downloader stopped. Their original sources and completed graph artifacts were retained.
+- The corrected selector confirmed that three annotated candidates have no corresponding public S3 video, preserved the original selection, and chose 50 available clips without changing the pre-committed activity mapping. Download and one-GPU batch jobs have been restarted from saved outputs. The batch now marks graphs `analyzed` while Neo4j is offline; the finalizer will load them before evaluation once the local server is available.
+- Neo4j cannot start inside this Codex process because Java's Windows loopback selector fails. The user restarted the approved portable server in a normal PowerShell window; Bolt is reachable on `127.0.0.1:7687`. The batch resumed model analysis at clip 15/50, and the finalizer will reconcile the earlier `analyzed` entries before evaluation.
 
 ## Working now
 

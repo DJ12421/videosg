@@ -19,6 +19,7 @@ BASE = ROOT / "data" / "meva"
 ANNOTATIONS = ROOT / "data" / "meva-meta" / "annotation" / "DIVA-phase-2" / "MEVA" / "kitware"
 MAPPING = ROOT / "eval_config" / "meva_mapping.csv"
 BUCKET = "https://mevadata-public-01.s3.amazonaws.com/"
+_S3_LISTINGS = {}
 
 
 def mapping():
@@ -55,29 +56,49 @@ def select(limit=50):
                                "activities": relevant})
     if not candidates:
         raise RuntimeError("No MEVA evaluation annotations found")
-    selected, covered = [], {name: 0 for name in labels}
+    selected, covered, unavailable = [], {name: 0 for name in labels}, []
     while candidates and len(selected) < limit:
         best = max(candidates, key=lambda row: (sum(1 / (1 + covered[name]) for name in row["activities"]),
                                                  -len(row["stem"]), row["stem"]))
         candidates.remove(best)
+        try:
+            best["s3_key"] = s3_key(best["stem"])
+        except ValueError:
+            unavailable.append(best["stem"])
+            continue
         selected.append(best)
         for name in best["activities"]:
             covered[name] += 1
+    if len(selected) != limit:
+        raise RuntimeError(f"Only {len(selected)} licensed clips found for a {limit}-clip selection")
     save_json(BASE / "selection.json", selected)
-    print(json.dumps({"selected": len(selected), "activity_clip_counts": covered}, indent=2))
+    save_json(BASE / "unavailable_clips.json", unavailable)
+    print(json.dumps({"selected": len(selected), "unavailable_annotation_clips": len(unavailable),
+                      "activity_clip_counts": covered}, indent=2))
 
 
 def s3_key(stem):
     day, hour = stem[:10], stem[11:13]
     prefix = f"drops-123-r13/{day}/{hour}/"
-    response = requests.get(BUCKET, params={"list-type": "2", "prefix": prefix}, timeout=30)
-    response.raise_for_status()
-    root = ET.fromstring(response.content)
-    ns = {"s": "http://s3.amazonaws.com/doc/2006-03-01/"}
-    keys = [node.text for node in root.findall("s:Contents/s:Key", ns)]
+    if prefix not in _S3_LISTINGS:
+        keys, token = [], None
+        while True:
+            params = {"list-type": "2", "prefix": prefix}
+            if token:
+                params["continuation-token"] = token
+            response = requests.get(BUCKET, params=params, timeout=30)
+            response.raise_for_status()
+            root = ET.fromstring(response.content)
+            ns = {"s": "http://s3.amazonaws.com/doc/2006-03-01/"}
+            keys.extend(node.text for node in root.findall("s:Contents/s:Key", ns))
+            token = root.findtext("s:NextContinuationToken", namespaces=ns)
+            if not token:
+                break
+        _S3_LISTINGS[prefix] = keys
+    keys = _S3_LISTINGS[prefix]
     matches = [key for key in keys if Path(key).name.startswith(stem + ".") and key.endswith(".avi")]
     if len(matches) != 1:
-        raise RuntimeError(f"Expected one S3 video for {stem}, got {len(matches)}")
+        raise ValueError(f"Expected one S3 video for {stem}, got {len(matches)}")
     return matches[0]
 
 
@@ -87,7 +108,7 @@ def download(limit=None):
         stem = row["stem"]
         target = BASE / "clips" / f"{stem}.avi"
         if not target.exists():
-            key = s3_key(stem)
+            key = row.get("s3_key") or s3_key(stem)
             download_ranges(BUCKET + key, target)
         case_id = "meva_" + hashlib.sha256(stem.encode()).hexdigest()[:12]
         if not (case_dir(case_id) / "video.json").exists():

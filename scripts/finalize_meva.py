@@ -1,13 +1,15 @@
 """Finish the licensed MEVA evaluation after the single-GPU batch exits."""
 
 import json
+import hashlib
 import os
 import subprocess
 import time
 
 from scripts.meva import manifest
+from neo4j.exceptions import ServiceUnavailable
 from videosg.evaluation import evaluate
-from videosg.pipeline import ROOT, read_json
+from videosg.pipeline import ROOT, load_graph, read_json, save_json
 
 
 base = ROOT / "data" / "meva"
@@ -17,17 +19,28 @@ while (base / "batch.pid").exists():
     print(f"MEVA batch: {sum(row['status'] == 'complete' for row in progress.values())}/{len(selection)} complete", flush=True)
     time.sleep(60)
 progress = read_json(base / "batch_progress.json")
-complete = [row for row in progress.values() if row["status"] == "complete"]
-if len(complete) != len(selection):
-    raise RuntimeError(f"MEVA batch incomplete: {len(complete)}/{len(selection)}; inspect batch_progress.json")
-
-manifest()
 environment = dict(line.split("=", 1) for line in (ROOT / ".env").read_text(encoding="utf-8").splitlines() if "=" in line)
 password = os.getenv("NEO4J_PASSWORD") or environment.get("NEO4J_PASSWORD")
 if not password:
     raise RuntimeError("Set NEO4J_PASSWORD for the Neo4j-backed evaluation")
-output = evaluate(base / "evaluation_manifest.json", uri=os.getenv("NEO4J_URI", environment.get("NEO4J_URI", "bolt://127.0.0.1:7687")),
-                  user=os.getenv("NEO4J_USER", environment.get("NEO4J_USER", "neo4j")), password=password)
+uri = os.getenv("NEO4J_URI", environment.get("NEO4J_URI", "bolt://127.0.0.1:7687"))
+user = os.getenv("NEO4J_USER", environment.get("NEO4J_USER", "neo4j"))
+for row in selection:
+    case_id = "meva_" + hashlib.sha256(row["stem"].encode()).hexdigest()[:12]
+    if progress.get(case_id, {}).get("status") not in {"complete", "analyzed"}:
+        raise RuntimeError(f"MEVA analysis incomplete for {case_id}; inspect batch_progress.json")
+    while progress[case_id]["status"] == "analyzed":
+        try:
+            load_graph(case_id, uri, user, password)
+        except ServiceUnavailable:
+            print(f"Waiting for local Neo4j before loading {case_id}", flush=True)
+            time.sleep(60)
+        else:
+            progress[case_id]["status"] = "complete"
+            save_json(base / "batch_progress.json", progress)
+
+manifest()
+output = evaluate(base / "evaluation_manifest.json", uri=uri, user=user, password=password)
 print(f"Evaluation: {output}", flush=True)
 
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.evidence_samples"], cwd=ROOT, check=True)

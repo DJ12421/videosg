@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock, patch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -8,7 +9,7 @@ from videosg.artifacts import rle
 from videosg.evaluation import bootstrap_by_video, graph_predictions, mock_graph_quality, score_query, temporal_iou
 from videosg.queries import TEMPLATES, TEMPLATE_HELP, prepare
 from videosg.rules import region_events
-from scripts.meva import activities
+from scripts.meva import _S3_LISTINGS, activities, s3_key
 from videosg.annotations import consensus
 from videosg.pipeline import save_json
 
@@ -63,6 +64,21 @@ class HandoffChecks(unittest.TestCase):
             path = Path(folder) / "clip.activities.yml"
             path.write_text("- {meta: clip was marked empty_37}\n- {act: {act2: {person_talks_to_person: 1.0}, timespan: [{tsr0: [30, 60]}]}}\n", encoding="utf-8")
             self.assertEqual(activities(path), {"person_talks_to_person": [[30, 60]]})
+
+    def test_meva_s3_listing_paginates_and_rejects_annotation_only_clip(self):
+        _S3_LISTINGS.clear()
+        namespace = 'xmlns="http://s3.amazonaws.com/doc/2006-03-01/"'
+        first = Mock(content=(f"<ListBucketResult {namespace}><Contents><Key>other.avi</Key></Contents>"
+                              "<NextContinuationToken>next</NextContinuationToken></ListBucketResult>").encode())
+        second = Mock(content=(f"<ListBucketResult {namespace}><Contents><Key>"
+                               "drops-123-r13/2018-03-07/16/2018-03-07.16-50-06.16-55-06.school.G424.r13.avi"
+                               "</Key></Contents></ListBucketResult>").encode())
+        with patch("scripts.meva.requests.get", side_effect=[first, second]) as request:
+            self.assertTrue(s3_key("2018-03-07.16-50-06.16-55-06.school.G424").endswith(".avi"))
+            with self.assertRaises(ValueError):
+                s3_key("2018-03-07.16-55-06.17-00-06.school.G424")
+            self.assertEqual(request.call_count, 2)
+        _S3_LISTINGS.clear()
 
     def test_two_annotator_consensus(self):
         with TemporaryDirectory() as folder:

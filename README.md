@@ -38,7 +38,7 @@ The case folder contains `videos.parquet`, `tracks.parquet`, per-track RLE masks
 
 ## Evaluation
 
-The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.csv`. The official MEVA evaluation annotations and selected source clips remain in ignored `data/`. The selector chooses 50 clips with a fixed algorithm and preserves both positive and no-match activity questions.
+The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.csv`. The official MEVA evaluation annotations and selected source clips remain in ignored `data/`. The selector chooses 50 clips with a fixed algorithm, checks that each source video exists in the public bucket, and records annotation-only exclusions in `data/meva/unavailable_clips.json`. It preserves both positive and no-match activity questions.
 
 ```powershell
 .\.venv\Scripts\python.exe -m scripts.meva select --limit 50
@@ -53,7 +53,7 @@ The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.c
 .\.venv\Scripts\python.exe -m scripts.figures
 ```
 
-`scripts.batch_meva` runs one GPU analysis at a time, resumes current outputs, records a Python PID and progress in ignored `data/meva/`, and loads each graph into local Neo4j. The evaluator writes B0 seeded random, B1 class presence, B2 CLIP frame/text, and B3 rule-graph tables with video-level bootstrap intervals, per-activity results, abstention and timing. B5 oracle is included when a mock-scene oracle graph is supplied. Mask IoU is reported only when ground-truth masks are supplied. Do not use evaluation annotations to tune thresholds.
+`scripts.batch_meva` runs one GPU analysis at a time, resumes current outputs, records a Python PID and progress in ignored `data/meva/`, and loads each graph into local Neo4j when it is available. If Neo4j is offline, it retains the analyzed graph for `scripts.finalize_meva` to load later. The evaluator writes B0 seeded random, B1 class presence, B2 CLIP frame/text, and B3 rule-graph tables with video-level bootstrap intervals, per-activity results, abstention and timing. B5 oracle is included when a mock-scene oracle graph is supplied. Mask IoU is reported only when ground-truth masks are supplied. Do not use evaluation annotations to tune thresholds.
 
 `scripts.finalize_meva` can wait for the batch, then run the Neo4j-backed evaluation, ablations and model spike in order. Its logs are in ignored `data/meva/`. The ablation script runs 1/2/5 FPS in isolated temporary copies of the public demo so it does not change the active config or MEVA batch.
 
