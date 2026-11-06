@@ -9,7 +9,7 @@ import time
 from scripts.meva import manifest
 from neo4j.exceptions import ServiceUnavailable
 from videosg.evaluation import evaluate
-from videosg.pipeline import ROOT, load_graph, read_json, save_json
+from videosg.pipeline import ROOT, case_dir, load_graph, pipeline_digest, read_json, save_json
 
 
 base = ROOT / "data" / "meva"
@@ -25,10 +25,14 @@ if not password:
     raise RuntimeError("Set NEO4J_PASSWORD for the Neo4j-backed evaluation")
 uri = os.getenv("NEO4J_URI", environment.get("NEO4J_URI", "bolt://127.0.0.1:7687"))
 user = os.getenv("NEO4J_USER", environment.get("NEO4J_USER", "neo4j"))
+current_pipeline = pipeline_digest()
 for row in selection:
     case_id = "meva_" + hashlib.sha256(row["stem"].encode()).hexdigest()[:12]
     if progress.get(case_id, {}).get("status") not in {"complete", "analyzed"}:
         raise RuntimeError(f"MEVA analysis incomplete for {case_id}; inspect batch_progress.json")
+    run = read_json(case_dir(case_id) / "graph.json")["run"]
+    if run["pipeline_sha256"] != current_pipeline or run["run_id"] != progress[case_id]["run_id"]:
+        raise RuntimeError(f"MEVA graph is stale or progress mismatched for {case_id}")
     while progress[case_id]["status"] == "analyzed":
         try:
             load_graph(case_id, uri, user, password)
