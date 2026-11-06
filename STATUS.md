@@ -1,6 +1,13 @@
 # Status — 2026-11-06
 
-## Nov 6 recovery
+## Current result
+
+- MEVA download, analysis, Neo4j load, and the B0/B1/B2/B3 evaluation are complete for all 50 selected clips. `data/meva/batch_progress.json` has 50 `complete` entries, and `eval/meva_evidence.json` has 50 checked snippet entries. No download, GPU batch, or finalizer process is running.
+- The full table is `eval/evaluation_manifest/table.md`. At tIoU 0.5, Recall@1 is 0.005 random, 0.010 class presence, 0.008 CLIP, and 0.006 rule graph. The graph does not beat the simple class-presence baseline; keep this negative result in the demo.
+- `eval/ablations/table.md` records the 1/2/5 FPS sweep, predicate drops, exact-frame padding sweep, and a repeat run with triplet Jaccard 1.0 and mean interval difference 0.0 s on the public clip. `eval/model_spike/table.md` has the 100-frame decode and two 20-frame inference measurements.
+- The one-command fixed-template video path returned a snippet with a complete Neo4j/source/frame audit. The finalizer's optional natural-language rerun failed because local Ollama was offline; the earlier 20-question Ollama check passed 20/20. Start Ollama before a live natural-language demo.
+
+## Nov 6 recovery history
 
 - The overnight job reached 14 analyzed clips. Ten loaded to Neo4j; four later loads failed because the locally launched Neo4j server stopped. Nine subsequent clip waits failed after the old downloader stopped. Their original sources and completed graph artifacts were retained.
 - The corrected selector confirmed that three annotated candidates have no corresponding public S3 video, preserved the original selection, and chose 50 available clips without changing the pre-committed activity mapping. Download and one-GPU batch jobs have been restarted from saved outputs. The batch now marks graphs `analyzed` while Neo4j is offline; the finalizer will load them before evaluation once the local server is available.
@@ -10,17 +17,16 @@
 ## Working now
 
 - The existing 20-second licensed Pexels clip completed ingest, panoptic analysis, a local `VIDEO_*` Neo4j load, fixed queries and exact-frame snippets. The most recent checked demo run had 136 tracks and 626 geometric relation intervals. Five current-run sidecars resolved to the original hash, graph elements and Neo4j IDs, with decoded MP4 frame counts matching the sidecars. A second load kept the same 136/626 counts; a no-match query returned no MP4.
-- `videosg` now writes videos/tracks/frame relations/interval relations in Parquet, per-track RLE masks, graph CSV, a run manifest and provenance sidecars. There are eight fixed read-only templates and a local Ollama Qwen 2.5 7B router. The 20-question check passed 10/10 answerable, 5/5 unanswerable and 5/5 adversarial prompts. Eight focused unit tests passed.
+- `videosg` now writes videos/tracks/frame relations/interval relations in Parquet, per-track RLE masks, graph CSV, a run manifest and provenance sidecars. There are eight fixed read-only templates and a local Ollama Qwen 2.5 7B router. The 20-question check passed 10/10 answerable, 5/5 unanswerable and 5/5 adversarial prompts. Ten focused unit tests passed.
 - Local Neo4j 5.26.30 has four uniqueness constraints and three indexes restricted to the video namespace. No shared team database or schema was available for reconciliation. The user approved this local instance in an earlier turn.
 - The MEVA evaluation annotation repository is pinned at commit `421841a75577b697c314e952e585aecbb1b99e17`; a fixed 50-clip selection covers the five pre-committed proxy mappings. The first 300-second clip decoded 9,002 true frames, then produced 541 tracks and 1,191 intervals from 601 sampled frames in 802.561 analysis seconds; GPU temperature stayed below 70 C. It loaded into local Neo4j. This is throughput, not an accuracy claim.
 - A one-video MEVA pilot table exists under ignored `eval/`. At temporal IoU 0.5, B3 rule-graph Recall@1 was 0.000, B1 class-presence 0.008, and B2 CLIP 0.008. One-video bootstrap intervals are degenerate; these are diagnostic pilot values, not final dataset results. The rule proxies are weak on the richer MEVA activities. No thresholds were tuned on these evaluation labels.
 - LAION CLIP ViT-B/32 weights were downloaded from the recorded mirror and hash-checked (`74813fbcdc750f235c9784c367ca1394d2a5c25eb0aac92761752ac239db7cff`). The Transformers-format model loaded and generated pilot frame-text scores.
 - A 100-frame OpenCV decode benchmark on the public clip measured 119.1 fps. An actual natural-language `footage_exists` query returned an MP4; nine sidecars now pass the source/graph/Neo4j/frame audit. All eight templates passed Neo4j `EXPLAIN`.
 
-## Running and remaining gates
+## Remaining gates
 
-- The 50-clip MEVA download/ingest process and one-GPU-at-a-time batch are running in ignored `data/meva/`; `batch.pid`, `batch_progress.json`, and batch logs identify progress. After completion, regenerate the manifest and run the full B0/B1/B2/B3 table with video-level confidence intervals and per-activity results. Re-run analysis for repeatability and document interval differences, provenance, latency and ablations.
-- A hidden `scripts.finalize_meva` process is waiting for all 50 batch results. It will run the full table, isolated 1/2/5 FPS and repeat-run ablations, predicate-drop and padding sweeps, and the 20-frame model spike after GPU analysis finishes. The demo timeline plot and three frame-verified padding snippets already exist under ignored `eval/` and `cases/`.
+- The full data run and follow-on measurements are complete. The finalizer exited nonzero only at its last optional Ollama-backed query; its earlier evaluation, evidence, ablation, and model-spike outputs are saved and verified individually.
 - PVSG evaluation footage has unresolved underlying dataset rights. Its pinned evaluator was inspected, but no PVSG data was downloaded or scored. Follow the handoff's MEVA-plus-mock fallback if clearance remains unresolved.
 - Cleared staged mock footage and two independent annotations have not been supplied. Capture/consent templates, consensus scoring and oracle-manifest tooling exist, but the staged demo and mock evaluation cannot be completed or claimed until those external inputs arrive. Signed forms belong outside the repository.
 - Known limits: frequent track switches and geometric false positives; mask overlays are nearest-sample approximations; `holding` and `touching` are proxies; region crossing needs manually configured boxes. See `LIMITATIONS.md`.
