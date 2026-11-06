@@ -36,6 +36,8 @@ Eight fixed templates are `presence`, `relation`, `holding`, `crossing`, `approa
 
 The case folder contains `videos.parquet`, `tracks.parquet`, per-track RLE masks, frame and interval relation Parquet, graph CSV, `RUN_MANIFEST.json`, snippets and sidecars. `audit` checks source hash, local graph IDs, Neo4j IDs and exact decoded snippet frame counts. The current COCO checkpoint retains raw class labels plus a smaller `forensic_class` view in `ontology.json`. A configured region box is required for `entering` and `leaving`; absent classes and unconfigured regions are unsupported.
 
+Frame relations store the lower of the two detected segment scores. Interval confidence discounts gaps in rule support, and graph edge confidence is capped by both endpoint-track means. These scores describe extraction support, not calibrated event probabilities; see `DECISIONS.md`.
+
 ## Evaluation
 
 The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.csv`. The official MEVA evaluation annotations and selected source clips remain in ignored `data/`. The selector chooses 50 clips with a fixed algorithm, checks that each source video exists in the public bucket, and records annotation-only exclusions in `data/meva/unavailable_clips.json`. It preserves both positive and no-match activity questions.

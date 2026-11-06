@@ -44,11 +44,13 @@ output = evaluate(base / "evaluation_manifest.json", uri=uri, user=user, passwor
 print(f"Evaluation: {output}", flush=True)
 
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.evidence_samples"], cwd=ROOT, check=True)
+subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.report_cost"], cwd=ROOT, check=True)
 
 from scripts.ablations import main as ablations
 
 ablations()
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.model_spike"], cwd=ROOT, check=True)
+subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.figures"], cwd=ROOT, check=True)
 demo = read_json(ROOT / "cases" / "demo" / "video" / "video.json")
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.run_video",
                 demo["path"], "--case-id", "demo", "--question", "Is there footage showing a person?"],

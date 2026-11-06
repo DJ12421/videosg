@@ -1,6 +1,11 @@
 # Status — 2026-11-06
 
-## Current result
+## Confidence schema rerun
+
+- Frame rule outputs now record model-derived scores; intervals record support-adjusted confidence and graph edges take the minimum of interval and endpoint-track confidence. The public clip was reanalyzed and loaded as run `d55f9dd664e6b2dd4989`; its frame/interval Parquet columns and graph edge confidence were checked.
+- The earlier 50 MEVA graphs and reports are archived under ignored `data/meva/pre_confidence_graphs/` and `eval/pre_confidence/`. The fixed 50 clips will be reanalyzed under the new pipeline digest, then reloaded and reevaluated. The earlier scores below are historical until that rerun finishes.
+
+## Previously completed baseline
 
 - MEVA download, analysis, Neo4j load, and the B0/B1/B2/B3 evaluation are complete for all 50 selected clips. `data/meva/batch_progress.json` has 50 `complete` entries, and `eval/meva_evidence.json` has 50 checked snippet entries. No download, GPU batch, or finalizer process is running.
 - The full table is `eval/evaluation_manifest/table.md`. At tIoU 0.5, Recall@1 is 0.005 random, 0.010 class presence, 0.008 CLIP, and 0.006 rule graph. The graph does not beat the simple class-presence baseline; keep this negative result in the demo.
