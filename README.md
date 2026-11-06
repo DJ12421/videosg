@@ -40,7 +40,7 @@ Frame relations store the lower of the two detected segment scores. Interval con
 
 ## Evaluation
 
-The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.csv`. The official MEVA evaluation annotations and selected source clips remain in ignored `data/`. The selector chooses 50 clips with a fixed algorithm, checks that each source video exists in the public bucket, and records annotation-only exclusions in `data/meva/unavailable_clips.json`. It preserves both positive and no-match activity questions.
+The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.csv`; `eval_config/MEVA_DATASET.md` records the observed clip format, camera IDs, activity counts and frame-alignment check. The official MEVA evaluation annotations and selected source clips remain in ignored `data/`. The selector chooses 50 clips with a fixed algorithm, checks that each source video exists in the public bucket, and records annotation-only exclusions in `data/meva/unavailable_clips.json`. It preserves both positive and no-match activity questions.
 
 ```powershell
 .\.venv\Scripts\python.exe -m scripts.meva select --limit 50

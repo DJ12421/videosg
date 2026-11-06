@@ -4,6 +4,7 @@
 
 - Frame rule outputs now record model-derived scores; intervals record support-adjusted confidence and graph edges take the minimum of interval and endpoint-track confidence. The public clip was reanalyzed and loaded as run `d55f9dd664e6b2dd4989`; its frame/interval Parquet columns and graph edge confidence were checked.
 - The earlier 50 MEVA graphs and reports are archived under ignored `data/meva/pre_confidence_graphs/` and `eval/pre_confidence/`. The fixed 50 clips will be reanalyzed under the new pipeline digest, then reloaded and reevaluated. The earlier scores below are historical until that rerun finishes.
+- `eval_config/MEVA_DATASET.md` records the selected activity, camera, format and decoded-frame checks. All selected label spans fit within their true decoded video frame counts.
 
 ## Previously completed baseline
 

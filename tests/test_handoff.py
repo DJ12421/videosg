@@ -9,7 +9,7 @@ from videosg.artifacts import rle
 from videosg.evaluation import bootstrap_by_video, graph_predictions, mock_graph_quality, score_query, temporal_iou
 from videosg.queries import TEMPLATES, TEMPLATE_HELP, prepare
 from videosg.rules import region_events
-from scripts.meva import _S3_LISTINGS, activities, s3_key
+from scripts.meva import _S3_LISTINGS, activities, checked_spans, s3_key
 from videosg.annotations import consensus
 from videosg.pipeline import save_json
 
@@ -64,6 +64,11 @@ class HandoffChecks(unittest.TestCase):
             path = Path(folder) / "clip.activities.yml"
             path.write_text("- {meta: clip was marked empty_37}\n- {act: {act2: {person_talks_to_person: 1.0}, timespan: [{tsr0: [30, 60]}]}}\n", encoding="utf-8")
             self.assertEqual(activities(path), {"person_talks_to_person": [[30, 60]]})
+
+    def test_meva_spans_use_true_decoded_frame_count(self):
+        self.assertEqual(checked_spans([[0, 29]], 30, 30), [[0, 1]])
+        with self.assertRaises(ValueError):
+            checked_spans([[0, 30]], 30, 30)
 
     def test_meva_s3_listing_paginates_and_rejects_annotation_only_clip(self):
         _S3_LISTINGS.clear()

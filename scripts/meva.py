@@ -42,6 +42,12 @@ def activities(path):
     return result
 
 
+def checked_spans(spans, n_frames, fps):
+    if any(start < 0 or end < start or end >= n_frames for start, end in spans):
+        raise ValueError("MEVA activity span exceeds the true decoded video frames")
+    return [[start / fps, (end + 1) / fps] for start, end in spans]
+
+
 def select(limit=50):
     labels = mapping()
     revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT / "data" / "meva-meta",
@@ -134,8 +140,7 @@ def manifest():
             raise RuntimeError(f"Source mismatch: {row['stem']}")
         queries = []
         for activity, rule in labels.items():
-            spans = [[start / video["fps"], (end + 1) / video["fps"]]
-                     for start, end in row["activities"].get(activity, [])]
+            spans = checked_spans(row["activities"].get(activity, []), video["n_frames"], video["fps"])
             queries.append({"text": activity.replace("_", " "), "activity": activity,
                             "subject_class": rule["subject_class"],
                             "object_class": rule["object_class"] or None,
