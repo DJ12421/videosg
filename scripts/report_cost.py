@@ -75,6 +75,7 @@ def main():
              "", f"Original MEVA source files: {report['source_gib']:.2f} GiB. "
              f"Local Neo4j database store: {report['neo4j_store_gib']:.2f} GiB; "
              f"transaction logs: {report['neo4j_transaction_gib']:.2f} GiB.", "",
+             "The local database size includes retained earlier runs; it is not the incremental size of this rerun.",
              "Decode timings include clips ingested before the grab-only decoder optimization; "
              "the distribution is a measured mixed-version cost, not a controlled decoder benchmark.",
              "Per-case run IDs, source hashes and raw timings are in `results.json`."]
