@@ -300,11 +300,14 @@ def evaluate(manifest_path, use_clip=True, uri=None, user="neo4j", password=None
     metrics = ["recall_1_0.3", "recall_1_0.5", "recall_1_0.7", "recall_5_0.3",
                "recall_5_0.5", "recall_5_0.7", "mean_tiou", "abstention", "mask_iou"]
     revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False)
-    lines = [f"# {next(iter(datasets))} retrieval evaluation", "", f"Command: `python -m videosg evaluate {manifest_path}`",
+    lines = [f"# {next(iter(datasets))} retrieval evaluation", "",
+             f"Command: `python -m videosg evaluate {manifest_path}{' --skip-clip' if not use_clip else ''}`",
              f"Config SHA-256: `{digest(ROOT / 'config.json')}`",
              f"Git SHA: `{revision.stdout.strip() if revision.returncode == 0 else 'uncommitted'}`",
              f"B3 source: {'Neo4j read-only query' if driver else 'local export (smoke check)' }", "",
              "| Baseline | Metric | Mean | 95% video bootstrap CI |", "|---|---|---:|---:|"]
+    if not use_clip:
+        lines.insert(6, "Smoke check only: B2 CLIP was skipped, so this is not a complete retrieval table.")
     if len(entries) < 2:
         lines.insert(6, "Pilot only: a one-video bootstrap interval is degenerate and not a population uncertainty estimate.")
     annotation_revisions = {entry.get("annotation_repo_sha") for entry in entries if entry.get("annotation_repo_sha")}
