@@ -1,0 +1,17 @@
+{
+  "case_id": "mock_arrival",
+  "clearance_confirmed": false,
+  "consent_forms_outside_repo": false,
+  "actors": ["actor_a", "actor_b"],
+  "props": ["backpack", "bench"],
+  "regions": ["door"],
+  "intended_event_times_s": [
+    {"start_s": 2, "end_s": 4, "action": "actor_a enters through the marked door region"},
+    {"start_s": 4, "end_s": 7, "action": "actor_a approaches the bench carrying the backpack"},
+    {"start_s": 7, "end_s": 9, "action": "actor_a places the backpack on the bench"},
+    {"start_s": 10, "end_s": 13, "action": "actor_a moves away from the bench"},
+    {"start_s": 13, "end_s": 15, "action": "actor_b enters through the marked door region"},
+    {"start_s": 15, "end_s": 18, "action": "actor_b approaches and stands near the backpack"}
+  ],
+  "capture_notes": "One fixed 1080p camera, fixed fps, visible clap at start; configure the normalized door box after framing. These times are script targets, not annotations."
+}

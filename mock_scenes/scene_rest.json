@@ -1,0 +1,15 @@
+{
+  "case_id": "mock_rest",
+  "clearance_confirmed": false,
+  "consent_forms_outside_repo": false,
+  "actors": ["actor_a", "actor_b"],
+  "props": ["couch", "bottle"],
+  "intended_event_times_s": [
+    {"start_s": 2, "end_s": 5, "action": "actor_a approaches the couch holding a bottle"},
+    {"start_s": 5, "end_s": 8, "action": "actor_a places the bottle beside the couch"},
+    {"start_s": 8, "end_s": 12, "action": "actor_a lies on the couch without a fall"},
+    {"start_s": 12, "end_s": 15, "action": "actor_b approaches the couch"},
+    {"start_s": 15, "end_s": 18, "action": "actor_b stands near actor_a"}
+  ],
+  "capture_notes": "One fixed 1080p camera, fixed fps, visible clap at start; no fall, injury or distress is acted or implied. These times are script targets, not annotations."
+}

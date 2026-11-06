@@ -1,0 +1,16 @@
+{
+  "case_id": "mock_handoff",
+  "clearance_confirmed": false,
+  "consent_forms_outside_repo": false,
+  "actors": ["actor_a", "actor_b"],
+  "props": ["backpack"],
+  "intended_event_times_s": [
+    {"start_s": 2, "end_s": 6, "action": "actor_a walks while carrying the backpack"},
+    {"start_s": 4, "end_s": 7, "action": "actor_b approaches actor_a"},
+    {"start_s": 7, "end_s": 9, "action": "the two actors stand near each other"},
+    {"start_s": 9, "end_s": 11, "action": "actor_a releases the backpack as actor_b takes it"},
+    {"start_s": 11, "end_s": 15, "action": "actor_b walks while carrying the backpack"},
+    {"start_s": 15, "end_s": 18, "action": "actor_a moves away from actor_b"}
+  ],
+  "capture_notes": "One fixed 1080p camera, fixed fps, visible clap at start; avoid occluding the backpack. Holding is a geometric proxy and does not establish transfer semantics."
+}
