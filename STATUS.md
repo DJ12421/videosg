@@ -4,7 +4,7 @@
 
 - Frame rule outputs now record model-derived scores; intervals record support-adjusted confidence and graph edges take the minimum of interval and endpoint-track confidence. The public clip was reanalyzed and loaded as run `d55f9dd664e6b2dd4989`; its frame/interval Parquet columns and graph edge confidence were checked.
 - The earlier 50 MEVA graphs and reports are archived under ignored `data/meva/pre_confidence_graphs/` and `eval/pre_confidence/`. The fixed 50 clips will be reanalyzed under the new pipeline digest, then reloaded and reevaluated. The earlier scores below are historical until that rerun finishes.
-- The single-GPU rerun is active; its Python PID is in `data/meva/batch.pid`, with progress in `data/meva/batch_confidence.stdout.log`. The waiting finalizer PID is in `data/meva/finalize.pid`, with output in `data/meva/finalize_confidence_v3.stdout.log`. `batch_progress.json` retains historical `complete` entries until each case is reprocessed, so use the batch log to track this rerun.
+- The single-GPU rerun is active; its Python PID is in `data/meva/batch.pid`, with progress in `data/meva/batch_confidence.stdout.log`. The waiting finalizer PID is in `data/meva/finalize.pid`, with output in `data/meva/finalize_confidence_v4.stdout.log`. `batch_progress.json` retains historical `complete` entries until each case is reprocessed, so use the batch log to track this rerun. The finalizer now rejects any stale graph or mismatched run ID before evaluation.
 - `eval_config/MEVA_DATASET.md` records the selected activity, camera, format and decoded-frame checks. All selected label spans fit within their true decoded video frame counts.
 
 ## Previously completed baseline
