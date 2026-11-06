@@ -60,7 +60,7 @@ The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.c
 
 `scripts.finalize_meva` can wait for the batch, then run the Neo4j-backed evaluation, ablations and model spike in order. Its logs are in ignored `data/meva/`. The ablation script runs 1/2/5 FPS in isolated temporary copies of the public demo so it does not change the active config or MEVA batch.
 
-For the current confidence-aware rerun, follow `data/meva/batch_confidence.stdout.log` and `data/meva/finalize_confidence_v4.stdout.log`; the true Python process IDs are in `data/meva/batch.pid` and `data/meva/finalize.pid`. `STATUS.md` records the latest verified milestone. After a laptop restart, check whether either PID still exists before starting a replacement process; saved case graphs are resumable. The finalizer rejects stale or mixed-version graphs.
+The completed confidence-aware rerun logged `50` complete and `0` failed in `data/meva/batch_confidence.stdout.log`; `data/meva/finalize_confidence_v4.stdout.log` records the completed evaluation and public demo. `STATUS.md` records the verified results. Saved case graphs are resumable, and the finalizer rejects stale or mixed-version graphs.
 
 `scripts.report_cost` summarizes the saved 50-clip run's decoder and inference rates, Neo4j query latency, local database size, and previously audited evidence completeness. It verifies that the manifest, progress, evidence, and query records refer to the same completed cases.
 
