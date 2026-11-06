@@ -55,4 +55,4 @@ demo = read_json(ROOT / "cases" / "demo" / "video" / "video.json")
 subprocess.run([ROOT / ".venv" / "Scripts" / "python.exe", "-m", "scripts.run_video",
                 demo["path"], "--case-id", "demo", "--question", "Is there footage showing a person?"],
                cwd=ROOT, check=True)
-print(json.dumps({"status": "complete", "clips": len(complete)}), flush=True)
+print(json.dumps({"status": "complete", "clips": len(selection)}), flush=True)
