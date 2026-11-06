@@ -4,11 +4,12 @@
 
 - Frame rule outputs now record model-derived scores; intervals record support-adjusted confidence and graph edges take the minimum of interval and endpoint-track confidence. The public clip was reanalyzed and loaded as run `d55f9dd664e6b2dd4989`; its frame/interval Parquet columns and graph edge confidence were checked.
 - The earlier 50 MEVA graphs and reports are archived under ignored `data/meva/pre_confidence_graphs/` and `eval/pre_confidence/`. The fixed 50 clips will be reanalyzed under the new pipeline digest, then reloaded and reevaluated. The earlier scores below are historical until that rerun finishes.
+- The single-GPU rerun is active; its Python PID is in `data/meva/batch.pid`, with progress in `data/meva/batch_confidence.stdout.log`. The waiting finalizer PID is in `data/meva/finalize.pid`, with output in `data/meva/finalize_confidence_v3.stdout.log`. `batch_progress.json` retains historical `complete` entries until each case is reprocessed, so use the batch log to track this rerun.
 - `eval_config/MEVA_DATASET.md` records the selected activity, camera, format and decoded-frame checks. All selected label spans fit within their true decoded video frame counts.
 
 ## Previously completed baseline
 
-- MEVA download, analysis, Neo4j load, and the B0/B1/B2/B3 evaluation are complete for all 50 selected clips. `data/meva/batch_progress.json` has 50 `complete` entries, and `eval/meva_evidence.json` has 50 checked snippet entries. No download, GPU batch, or finalizer process is running.
+- MEVA download, analysis, Neo4j load, and the B0/B1/B2/B3 evaluation previously completed for all 50 selected clips. The earlier run had 50 `complete` entries and 50 checked evidence snippets.
 - The full table is `eval/evaluation_manifest/table.md`. At tIoU 0.5, Recall@1 is 0.005 random, 0.010 class presence, 0.008 CLIP, and 0.006 rule graph. The graph does not beat the simple class-presence baseline; keep this negative result in the demo.
 - `eval/ablations/table.md` records the 1/2/5 FPS sweep, predicate drops, exact-frame padding sweep, and a repeat run with triplet Jaccard 1.0 and mean interval difference 0.0 s on the public clip. `eval/model_spike/table.md` has the 100-frame decode and two 20-frame inference measurements.
 - `eval/cost_report/table.md` summarizes the 50 saved runs: median 1,385.5 source frames/s during ingest, 3.87 analyzed samples/s, 155.3 analysis seconds per video, 0.0197 s median Neo4j query time, and a 0.08 GiB local graph store. All 50 evidence records were previously audited; the report verifies that the same cases occur in the manifest and progress files. Ingest times span two decoder implementations, so this is a measured mixed-version cost.
@@ -33,7 +34,7 @@
 
 ## Remaining gates
 
-- The full data run and follow-on measurements are complete. The finalizer exited nonzero only at its last optional Ollama-backed query; its earlier evaluation, evidence, ablation, and model-spike outputs are saved and verified individually.
+- The confidence-aware MEVA rerun and its follow-on evaluation are in progress. Earlier evaluation, evidence, ablation, and model-spike outputs remain archived until refreshed.
 - PVSG evaluation footage has unresolved underlying dataset rights. Its pinned evaluator was inspected, but no PVSG data was downloaded or scored. Follow the handoff's MEVA-plus-mock fallback if clearance remains unresolved.
 - Cleared staged mock footage and two independent annotations have not been supplied. Capture/consent templates, consensus scoring and oracle-manifest tooling exist, but the staged demo and mock evaluation cannot be completed or claimed until those external inputs arrive. Signed forms belong outside the repository.
 - Known limits: frequent track switches and geometric false positives; mask overlays are nearest-sample approximations; `holding` and `touching` are proxies; region crossing needs manually configured boxes. See `LIMITATIONS.md`.
