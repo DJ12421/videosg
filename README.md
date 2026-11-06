@@ -51,11 +51,14 @@ The five MEVA activity-to-rule mappings are fixed in `eval_config/meva_mapping.c
 .\.venv\Scripts\python.exe -m scripts.model_spike
 .\.venv\Scripts\python.exe -m scripts.ablations
 .\.venv\Scripts\python.exe -m scripts.figures
+.\.venv\Scripts\python.exe -m scripts.report_cost
 ```
 
 `scripts.batch_meva` runs one GPU analysis at a time, resumes current outputs, records a Python PID and progress in ignored `data/meva/`, and loads each graph into local Neo4j when it is available. If Neo4j is offline, it retains the analyzed graph for `scripts.finalize_meva` to load later. The evaluator writes B0 seeded random, B1 class presence, B2 CLIP frame/text, and B3 rule-graph tables with video-level bootstrap intervals, per-activity results, abstention and timing. B5 oracle is included when a mock-scene oracle graph is supplied. Mask IoU is reported only when ground-truth masks are supplied. Do not use evaluation annotations to tune thresholds.
 
 `scripts.finalize_meva` can wait for the batch, then run the Neo4j-backed evaluation, ablations and model spike in order. Its logs are in ignored `data/meva/`. The ablation script runs 1/2/5 FPS in isolated temporary copies of the public demo so it does not change the active config or MEVA batch.
+
+`scripts.report_cost` summarizes the saved 50-clip run's decoder and inference rates, Neo4j query latency, local database size, and previously audited evidence completeness. It verifies that the manifest, progress, evidence, and query records refer to the same completed cases.
 
 PVSG video rights are not yet established. The pinned official evaluator is inspected separately from its dataset; no PVSG video is redistributed or evaluated until those rights and access are cleared. The handoff's documented fallback is MEVA plus consented mock scenes. The stage's rule predicates are geometric proxies: `touching` is mask proximity, `holding` is contact and co-motion, and `near` does not establish conversation.
 

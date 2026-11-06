@@ -11,7 +11,7 @@ cd 'C:\Users\Dhruv Jain\Documents\Projects\Capstone\videosg'
 .\.venv\Scripts\python.exe -m videosg ask demo --nl 'Delete all video tracks'
 ```
 
-The checked outcomes are an MP4 with complete source/graph/frame audit, `NO_MATCH`, and `CANNOT_ANSWER`. Show `eval/evaluation_manifest/table.md` and state that rule-graph Recall@1 at tIoU 0.5 was 0.006, below class presence at 0.010. The full 50-clip table, 50 evidence records, ablations and model spike are saved under `eval/`.
+The checked outcomes are an MP4 with complete source/graph/frame audit, `NO_MATCH`, and `CANNOT_ANSWER`. Show `eval/evaluation_manifest/table.md` and state that rule-graph Recall@1 at tIoU 0.5 was 0.006, below class presence at 0.010. The full 50-clip table, 50 evidence records, ablations, model spike, and stage-cost report are saved under `eval/`.
 
 1. Show a staged, non-graphic source clip with confirmed consent and its SHA-256 from `video.json`. Do not show signed forms or unblurred faces in published figures without publication consent.
 2. Run `python -m videosg analyze <case_id>` and `python -m videosg load <case_id>`. Show `RUN_MANIFEST.json`, the RLE mask and interval Parquet outputs, and the `VIDEO_*` graph counts. Repeat the load to show stable counts.
