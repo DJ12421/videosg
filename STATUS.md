@@ -5,6 +5,7 @@
 - Frame rule outputs now record model-derived scores; intervals record support-adjusted confidence and graph edges take the minimum of interval and endpoint-track confidence. The public clip was reanalyzed and loaded as run `d55f9dd664e6b2dd4989`; its frame/interval Parquet columns and graph edge confidence were checked.
 - The fixed 50 MEVA clips were reanalyzed, loaded, and reevaluated with the confidence-aware pipeline. The batch logged `50` complete and `0` failed; the finalizer logged `complete` for 50 clips. A separate check matched all 50 graph pipeline digests and run IDs to the current pipeline and progress file. Earlier graphs and reports remain in ignored `data/meva/pre_confidence_graphs/` and `eval/pre_confidence/`.
 - The refreshed evaluation table, 50/50 audited evidence records, cost report, ablations, model spike, figure, and public-video NL demo were produced. The final demo audit checked four current-run sidecars against the source hash, graph, Neo4j IDs and exact decoded frame counts.
+- A licensed MEVA fallback one-command rehearsal reused run `991deb480896317c73c1`, returned five person-proximity snippets, and audited six current-run sidecars. Its first short snippet resolves to source frames 0–119 at 30 fps. This is a public-dataset fallback, not a consented mock-scene demo or evidence of conversation.
 - `eval_config/MEVA_DATASET.md` records the selected activity, camera, format and decoded-frame checks. All selected label spans fit within their true decoded video frame counts.
 
 ## Current measured evaluation
