@@ -147,19 +147,22 @@ def aggregate(observations, step, last_frame, gap_samples, min_support, run_id, 
     grouped = {}
     for item in observations:
         key = (item["subject"], item["predicate"], item["object"])
-        grouped.setdefault(key, []).append(item["frame"])
+        grouped.setdefault(key, []).append((item["frame"], item.get("score", 1.0)))
     result = []
     for (subject, predicate, obj), frames in sorted(grouped.items()):
         spans = [[frames[0]]]
         for frame in frames[1:]:
-            if frame - spans[-1][-1] <= step * (gap_samples + 1):
+            if frame[0] - spans[-1][-1][0] <= step * (gap_samples + 1):
                 spans[-1].append(frame)
             else:
                 spans.append([frame])
         for support in spans:
             if len(support) < (1 if predicate in {"entering", "leaving", "falling"} else min_support):
                 continue
-            start, end = support[0], min(last_frame, support[-1] + step - 1)
+            start, end = support[0][0], min(last_frame, support[-1][0] + step - 1)
+            support_frames = [frame for frame, _ in support]
+            coverage = len(support) / (1 + (support_frames[-1] - support_frames[0]) // step)
+            interval_conf = sum(score for _, score in support) / len(support) * coverage
             relation_id = hashlib.sha256(
                 f"{run_id}:{subject}:{predicate}:{obj}:{start}:{end}".encode()
             ).hexdigest()[:20]
@@ -167,7 +170,8 @@ def aggregate(observations, step, last_frame, gap_samples, min_support, run_id, 
                 "rel_uid": relation_id, "subject": subject, "predicate": predicate,
                 "object": obj, "start_frame": start, "end_frame": end,
                 "start_s": start / fps, "end_s": (end + 1) / fps,
-                "support_frames": support, "run_id": run_id, "method": "geometry",
+                "support_frames": support_frames, "interval_conf": interval_conf,
+                "run_id": run_id, "method": "geometry",
             })
     return result
 
@@ -272,7 +276,7 @@ def analyze(case_id, force=False):
                 if index not in assigned and uid not in used:
                     assigned[index], used = uid, used | {uid}
             track_mask = np.zeros(labels.shape, dtype=np.uint16)
-            active = {}
+            active, active_scores = {}, {}
             for index, (label, mask, score, is_thing) in enumerate(segments):
                 uid = assigned.get(index)
                 if uid is None:
@@ -293,6 +297,7 @@ def analyze(case_id, force=False):
                 entry["observations"] += 1
                 previous[uid] = {"class": label, "mask": mask, "sample": sample_count}
                 active[track_uid] = mask
+                active_scores[track_uid] = score
                 track_mask[mask] = uid
             if not cv2.imwrite(str(mask_dir / f"{frame_index:08d}.png"), track_mask):
                 raise RuntimeError("Could not write track mask")
@@ -308,14 +313,16 @@ def analyze(case_id, force=False):
                                        tracks[obj]["class"], settings, rule_history,
                                        (subject, obj), sample_count)
                     observations.extend({"subject": subject, "predicate": word, "object": obj,
-                                         "frame": frame_index, "run_id": run_id, "method": "geometry"}
+                                         "frame": frame_index, "score": min(active_scores[subject], active_scores[obj]),
+                                         "run_id": run_id, "method": "geometry"}
                                         for word in words)
             for uid in ids:
                 if tracks[uid]["class"] != "person":
                     continue
                 for word, region in region_events(active[uid], settings["regions"], region_history, uid, sample_count):
                     observations.append({"subject": uid, "predicate": word, "object": f"{run_id}:region:{region}",
-                                         "frame": frame_index, "run_id": run_id, "method": "geometry"})
+                                         "frame": frame_index, "score": active_scores[uid],
+                                         "run_id": run_id, "method": "geometry"})
             frame_index += 1
     finally:
         capture.release()
@@ -332,6 +339,9 @@ def analyze(case_id, force=False):
         observations, step, video["n_frames"] - 1,
         settings["max_relation_gap_samples"], settings["min_relation_support_samples"], run_id, video["fps"],
     )
+    for relation in relations:
+        relation["conf"] = min(tracks[relation["subject"]]["mean_score"],
+                               tracks[relation["object"]]["mean_score"], relation["interval_conf"])
     revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False)
     graph = {
         "case_id": video["case_id"], "video": video, "run": {
@@ -339,6 +349,7 @@ def analyze(case_id, force=False):
             "seg_model": settings["model"], "seg_weights_sha256": weights_hash,
             "tracker": "same-class-mask-iou", "tracker_version": "1",
             "relation_method": "geometry", "host_gpu": torch.cuda.get_device_name(0) if device == "cuda" else "cpu",
+            "confidence_method": "mean frame segment score times support coverage; minimum with endpoint means",
             "started_at": started_at, "finished_at": datetime.now(timezone.utc).isoformat(),
             "config_sha256": digest(ROOT / "config.json"), "pipeline_sha256": pipeline_hash,
             "analysis_fps": video["fps"] / step,
