@@ -1,0 +1,21 @@
+{
+  "dataset": "Clarity staged crime clips",
+  "dataset_revision": "f3811b54144cdf4fbd94ed616f01ac31bc211e52",
+  "source_file": "clips/clip8/cam1.mp4",
+  "video_sha256": "27ef7cb666d691641174c3fabdd6538dbf4f220d09969c29ae5c7feb6f238916",
+  "annotator_id": "codex_agent_visual_review",
+  "human_annotator": false,
+  "provisional": true,
+  "review_method": "Original video frames reviewed without model predictions; publisher's clip-level description was already known and has no event timestamps.",
+  "actors": {
+    "person_a": "person waiting beside bus shelter with a phone",
+    "person_b": "person who enters from the left and later leaves"
+  },
+  "events": [
+    {"predicate": "approaching", "subject": "person_b", "object": "person_a", "start_s": 3.3, "end_s": 4.2},
+    {"predicate": "near", "subject": "person_b", "object": "person_a", "start_s": 4.1, "end_s": 6.7},
+    {"predicate": "touching", "subject": "person_b", "object": "person_a", "start_s": 6.45, "end_s": 6.8},
+    {"predicate": "moving_away", "subject": "person_b", "object": "person_a", "start_s": 6.75, "end_s": 7.6}
+  ],
+  "excluded_label": "The phone is too small to confirm a distinct holding interval from the reviewed frames."
+}

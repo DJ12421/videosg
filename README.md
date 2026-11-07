@@ -66,6 +66,24 @@ The completed confidence-aware rerun logged `50` complete and `0` failed in `dat
 
 PVSG video rights are not yet established. The pinned official evaluator is inspected separately from its dataset; no PVSG video is redistributed or evaluated until those rights and access are cleared. The handoff's documented fallback is MEVA plus consented mock scenes. The stage's rule predicates are geometric proxies: `touching` is mask proximity, `holding` is contact and co-motion, and `near` does not establish conversation.
 
+## External staged-scene pilot
+
+Two short, non-graphic single-camera clips from the CC BY 4.0 [Clarity dataset](https://huggingface.co/datasets/waliviqas/clarity-crime-clips) were run with provisional agent-reviewed intervals. `eval_config/CLARITY_PILOT.md` records their annotation provenance and negative results. This does not replace the own mock scenes or two independent human annotations. Credit "Clarity team, NVIDIA x Red Hat Small Models Hack 2026" when showing the footage. Keep the originals in ignored `data/clarity/`.
+
+```powershell
+$clarityRevision = 'f3811b54144cdf4fbd94ed616f01ac31bc211e52'
+New-Item -ItemType Directory -Path .\data\clarity -Force | Out-Null
+Invoke-WebRequest "https://huggingface.co/datasets/waliviqas/clarity-crime-clips/resolve/$clarityRevision/clips/clip8/cam1.mp4" -OutFile .\data\clarity\clip8_cam1.mp4
+Invoke-WebRequest "https://huggingface.co/datasets/waliviqas/clarity-crime-clips/resolve/$clarityRevision/clips/clip7/cam2.mp4" -OutFile .\data\clarity\clip7_cam2.mp4
+if ((Get-FileHash .\data\clarity\clip8_cam1.mp4 -Algorithm SHA256).Hash.ToLower() -ne '27ef7cb666d691641174c3fabdd6538dbf4f220d09969c29ae5c7feb6f238916') { throw 'clip8 hash mismatch' }
+if ((Get-FileHash .\data\clarity\clip7_cam2.mp4 -Algorithm SHA256).Hash.ToLower() -ne 'ca34eb491b84feab030c79cea9e002a364fd5964d6f3aba85f46cde99a74ef49') { throw 'clip7 hash mismatch' }
+.\.venv\Scripts\python.exe -m scripts.run_video .\data\clarity\clip8_cam1.mp4 --case-id clarity_clip8_cam1
+.\.venv\Scripts\python.exe -m videosg ingest clarity_clip7_cam2 .\data\clarity\clip7_cam2.mp4
+.\.venv\Scripts\python.exe -m videosg analyze clarity_clip7_cam2
+.\.venv\Scripts\python.exe -m videosg load clarity_clip7_cam2
+.\.venv\Scripts\python.exe -m videosg evaluate .\eval_config\clarity_staged_pilot.json
+```
+
 ## Mock scenes and handoff
 
 `mock_scenes/README.md` has the capture and annotation protocol. Do not record without confirmed clearance and consent. Two people annotate independently, then run `python -m videosg consensus first.json second.json consensus.json` and `python -m scripts.prepare_mock scene.json consensus.json` to build an oracle and evaluation manifest. Store signed forms outside this repository; blur identifiable faces in published figures unless publication consent is explicit.

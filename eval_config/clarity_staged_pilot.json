@@ -1,0 +1,108 @@
+[
+  {
+    "dataset": "Clarity external staged pilot - provisional agent labels",
+    "case_id": "clarity_clip8_cam1",
+    "annotation_repo_sha": "f3811b54144cdf4fbd94ed616f01ac31bc211e52",
+    "annotation_source": "eval_config/clarity_clip8_agent_review.json; one agent visual review, not independent human ground truth",
+    "queries": [
+      {
+        "activity": "person approaches person",
+        "text": "When does one person approach another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "approaching",
+        "truth": [[3.3, 4.2]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person near person",
+        "text": "When are two people near each other?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "near",
+        "truth": [[4.1, 6.7]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person touches person",
+        "text": "When does one person touch another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "touching",
+        "truth": [[6.45, 6.8]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person moves away from person",
+        "text": "When does one person move away from another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "moving_away",
+        "truth": [[6.75, 7.6]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "no person near dog",
+        "text": "When is a person near a dog?",
+        "subject_class": "person",
+        "object_class": "dog",
+        "predicate": "near",
+        "truth": [],
+        "typical_duration_s": 4.0
+      }
+    ]
+  },
+  {
+    "dataset": "Clarity external staged pilot - provisional agent labels",
+    "case_id": "clarity_clip7_cam2",
+    "annotation_repo_sha": "f3811b54144cdf4fbd94ed616f01ac31bc211e52",
+    "annotation_source": "eval_config/clarity_clip7_agent_review.json; one agent visual review, not independent human ground truth",
+    "queries": [
+      {
+        "activity": "person approaches person",
+        "text": "When does one person approach another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "approaching",
+        "truth": [[0.9, 1.4]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person near person",
+        "text": "When are two people near each other?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "near",
+        "truth": [[1.1, 2.2]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person touches person",
+        "text": "When does one person touch another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "touching",
+        "truth": [[1.3, 2.0]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "person moves away from person",
+        "text": "When does one person move away from another?",
+        "subject_class": "person",
+        "object_class": "person",
+        "predicate": "moving_away",
+        "truth": [[1.9, 3.2]],
+        "typical_duration_s": 4.0
+      },
+      {
+        "activity": "no person near dog",
+        "text": "When is a person near a dog?",
+        "subject_class": "person",
+        "object_class": "dog",
+        "predicate": "near",
+        "truth": [],
+        "typical_duration_s": 4.0
+      }
+    ]
+  }
+]
